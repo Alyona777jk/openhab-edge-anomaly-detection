@@ -1,0 +1,12 @@
+Group gTelemetry "Сенсори телеметрії"
+Group gAnomalyAI "Edge AI Anomaly Detection"
+
+Number:Power         Device_Power_Watts      "Споживання енергії [%.1f W]"   (gTelemetry)
+Number:Temperature   Room_Temperature        "Температура [%.1f °C]"         (gTelemetry)
+Number:Dimensionless Room_Humidity         "Вологість [%.1f %%]"           (gTelemetry)
+
+Number               AI_Anomaly_Score        "Anomaly Score [%.3f]"          (gAnomalyAI)
+Number               AI_Adaptive_Threshold   "Адаптивний поріг [%.3f]"       (gAnomalyAI)
+String               AI_Anomaly_Severity     "Рівень загрози [%s]"           (gAnomalyAI)
+String               AI_Anomaly_Explanation  "Пояснення моделі [%s]"         (gAnomalyAI)
+Switch               AI_Anomaly_Alert        "Активна тривога"               (gAnomalyAI)

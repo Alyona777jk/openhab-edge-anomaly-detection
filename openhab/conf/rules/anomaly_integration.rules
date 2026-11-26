@@ -1,0 +1,31 @@
+rule "Edge AI Anomaly Detection Inference"
+when
+    Item Edge_Room_Temp changed or
+    Item Edge_Power_Watts changed
+then
+    val temp = if (Edge_Room_Temp.state instanceof Number) Edge_Room_Temp.state.toString else "21.0"
+    val hum = if (Edge_Room_Humidity.state instanceof Number) Edge_Room_Humidity.state.toString else "48.0"
+    val power = if (Edge_Power_Watts.state instanceof Number) Edge_Power_Watts.state.toString else "150.0"
+
+    // Виклик Edge ML інференсу
+    val jsonResult = executeCommandLine(Duration.ofSeconds(10), "/openhab/conf/scripts/run_inference.sh", temp, hum, power)
+    
+    if (jsonResult !== null && jsonResult.contains("anomaly_score")) {
+        val score = transform("JSONPATH", "$.anomaly_score", jsonResult)
+        val severity = transform("JSONPATH", "$.severity", jsonResult)
+        val explanation = transform("JSONPATH", "$.explanation", jsonResult)
+        val isAnomaly = transform("JSONPATH", "$.is_anomaly", jsonResult)
+        val suppressed = transform("JSONPATH", "$.suppressed_duplicate", jsonResult)
+
+        AI_Anomaly_Score.postUpdate(Integer.parseInt(score))
+        AI_Anomaly_Severity.postUpdate(severity)
+        AI_Anomaly_Explanation.postUpdate(explanation)
+
+        if (isAnomaly == "true" && suppressed == "false") {
+            AI_Anomaly_Alert.sendCommand(ON)
+            logWarn("EdgeAI", "АНОМАЛІЯ [" + severity + "] Score=" + score + ": " + explanation)
+        } else if (isAnomaly == "false") {
+            AI_Anomaly_Alert.postUpdate(OFF)
+        }
+    }
+end

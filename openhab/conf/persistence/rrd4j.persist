@@ -1,0 +1,9 @@
+Strategies {
+    everyMinute : "0 * * * * ?"
+    default = everyChange
+}
+
+Items {
+    gTelemetry* : strategy = everyChange, everyMinute
+    AI_Anomaly_Score, AI_Adaptive_Threshold : strategy = everyChange
+}
